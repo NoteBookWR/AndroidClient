@@ -27,9 +27,15 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Paint;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -66,12 +72,16 @@ import net.micode.notes.ui.NoteEditText.OnTextViewChangeListener;
 import net.micode.notes.widget.NoteWidgetProvider_2x;
 import net.micode.notes.widget.NoteWidgetProvider_4x;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 
 public class NoteEditActivity extends Activity implements OnClickListener,
         NoteSettingChangedListener, OnTextViewChangeListener {
@@ -152,6 +162,15 @@ public class NoteEditActivity extends Activity implements OnClickListener,
     
     private Button btnDelete;
     private Button btnClock;
+    private Button btnAddPic;
+    private ImageView imgPic;
+    
+	private final int CAPTURE_CODE = 1001;
+	private final int ALBUM_CODE   = 1002;
+	
+	private Bitmap bitmap;
+	
+	private Long NoteID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -162,6 +181,7 @@ public class NoteEditActivity extends Activity implements OnClickListener,
             finish();
             return;
         }
+        new getImageTask().execute();
         initResources();
     }
 
@@ -179,7 +199,7 @@ public class NoteEditActivity extends Activity implements OnClickListener,
                 finish();
                 return;
             }
-            Log.d(TAG, "Restoring from killed activity");
+            Log.e(TAG, "Restoring from killed activity");
         }
     }
 
@@ -191,6 +211,7 @@ public class NoteEditActivity extends Activity implements OnClickListener,
         mWorkingNote = null;
         if (TextUtils.equals(Intent.ACTION_VIEW, intent.getAction())) {
             long noteId = intent.getLongExtra(Intent.EXTRA_UID, 0);
+            NoteID = noteId;
             mUserQuery = "";
 
             /**
@@ -198,6 +219,7 @@ public class NoteEditActivity extends Activity implements OnClickListener,
              */
             if (intent.hasExtra(SearchManager.EXTRA_DATA_KEY)) {
                 noteId = Long.parseLong(intent.getStringExtra(SearchManager.EXTRA_DATA_KEY));
+                NoteID = noteId;
                 mUserQuery = intent.getStringExtra(SearchManager.USER_QUERY);
             }
 
@@ -233,11 +255,12 @@ public class NoteEditActivity extends Activity implements OnClickListener,
             long callDate = intent.getLongExtra(Notes.INTENT_EXTRA_CALL_DATE, 0);
             if (callDate != 0 && phoneNumber != null) {
                 if (TextUtils.isEmpty(phoneNumber)) {
-                    Log.w(TAG, "The call record number is null");
+                    Log.e(TAG, "The call record number is null");
                 }
                 long noteId = 0;
                 if ((noteId = DataUtils.getNoteIdByPhoneNumberAndCallDate(getContentResolver(),
                         phoneNumber, callDate)) > 0) {
+                	NoteID = noteId;
                     mWorkingNote = WorkingNote.load(this, noteId);
                     if (mWorkingNote == null) {
                         Log.e(TAG, "load call note failed with note id" + noteId);
@@ -402,6 +425,41 @@ public class NoteEditActivity extends Activity implements OnClickListener,
 				setReminder();
 			}
 		});
+        
+        btnAddPic = (Button)findViewById(R.id.note_btn_addpic);
+        btnAddPic.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
+				new AlertDialog.Builder(NoteEditActivity.this)
+				.setTitle("选择图片")
+				.setIcon(android.R.drawable.ic_dialog_info)
+				.setSingleChoiceItems(new String[]{"相机","来自相册"}, 0, 
+						new DialogInterface.OnClickListener() {
+							
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								if(which == 0) {
+									Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+									startActivityForResult(intent, CAPTURE_CODE);
+								} else if(which == 1) {
+									Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+									intent.setType("image/");
+									startActivityForResult(intent, ALBUM_CODE);
+								}
+								dialog.dismiss();
+							}
+						}
+				)
+				.setNegativeButton("取消", null)
+				.show();
+			}
+        	
+        });
+        
+        imgPic = (ImageView)findViewById(R.id.note_image_pic);
+        
         mNoteHeaderHolder.ibSetBgColor.setOnClickListener(this);
         mNoteEditor = (EditText) findViewById(R.id.note_edit_view);
         mNoteEditorPanel = findViewById(R.id.sv_note_edit);
@@ -429,7 +487,101 @@ public class NoteEditActivity extends Activity implements OnClickListener,
         mEditTextList = (LinearLayout) findViewById(R.id.note_edit_list);
     }
 
+    
+    
     @Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		// TODO Auto-generated method stub
+		super.onActivityResult(requestCode, resultCode, data);
+		
+		if(resultCode != Activity.RESULT_OK) {
+			return;
+		}
+		if(requestCode == CAPTURE_CODE) {
+			bitmap = (Bitmap)data.getExtras().get("data");
+		} else if(requestCode == ALBUM_CODE) {
+			Uri originalUri = data.getData();
+			try {
+				bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), originalUri);
+			} catch (Exception e) {
+				return;
+			}
+		}
+//		new storeImageTask().execute();
+		imgPic.setImageBitmap(bitmap);
+	}
+
+    private class storeImageTask extends AsyncTask<Void, Void, Void>{
+
+		@Override
+		protected Void doInBackground(Void... arg0) {
+			// TODO Auto-generated method stub
+			if(null == bitmap){
+				Log.e("net.micode.notes", "bitmap is not exist");
+				return null;
+			}
+			try {
+				if(null != NoteID){
+					File together = new File(Environment.getExternalStorageDirectory() + "/notewr");
+					if(!together.exists()){
+						together.mkdirs();
+					}
+					FileOutputStream fop = new FileOutputStream(Environment.getExternalStorageDirectory() + "/notewr/" + NoteID +".jpg");
+					bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fop);
+					fop.close();
+					Log.e(TAG, "we have store the bitmap");
+				}
+
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}
+    	
+    };
+    
+    private class getImageTask extends AsyncTask<Void, Void, Bitmap>{
+
+		@Override
+		protected Bitmap doInBackground(Void... params) {
+			// TODO Auto-generated method stub
+			if(null == NoteID){
+				Log.e(TAG, "we have not get the NoteID");
+				return null;
+			}
+			
+			try {
+				FileInputStream fis = new FileInputStream(Environment.getExternalStorageDirectory() + "/notewr/" + NoteID +".jpg");
+				Bitmap myLittleBitmap = BitmapFactory.decodeStream(fis);
+				if(null == myLittleBitmap){
+					Log.e(TAG, "we have not get the bitmap");
+					return null;
+				}else{
+					return myLittleBitmap;
+				}
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				Log.e(TAG, "file is wrong");
+				return null;
+			}
+			
+		}
+
+		@Override
+		protected void onPostExecute(Bitmap result) {
+			// TODO Auto-generated method stub
+			imgPic.setImageBitmap(result);
+			super.onPostExecute(result);
+		}
+    			
+    }
+    
+	@Override
     protected void onPause() {
         super.onPause();
         if(saveNote()) {
@@ -849,8 +1001,11 @@ public class NoteEditActivity extends Activity implements OnClickListener,
              * new node requires to the top of the list. This code
              * {@link #RESULT_OK} is used to identify the create/edit state
              */
+        	NoteID = mWorkingNote.getNoteId();
             setResult(RESULT_OK);
         }
+        Log.e(TAG, "we get the note id is " + NoteID);
+        new storeImageTask().execute();
         return saved;
     }
 

@@ -85,7 +85,8 @@
 
                 <LinearLayout
                     android:layout_width="fill_parent"
-                    android:layout_height="fill_parent">
+                    android:layout_height="fill_parent"
+                    android:orientation="vertical">
 
                     <net.micode.notes.ui.NoteEditText
                         android:id="@+id/note_edit_view"
@@ -106,8 +107,18 @@
                         android:orientation="vertical"
                         android:layout_marginLeft="-10dip"
                         android:visibility="gone" />
+                    
+              	  	<ImageView
+              	  	    android:id="@+id/note_image_pic"
+              	  	    android:layout_width="wrap_content"
+              	  	    android:layout_height="150dp"
+              	  	    android:layout_alignParentLeft="true"
+              	  	    android:layout_marginLeft="40dp" />
+
                 </LinearLayout>
             </ScrollView>
+            
+            
 			<RelativeLayout 
 			    android:layout_width="fill_parent"
 			    android:layout_height="88dp">
@@ -118,6 +129,14 @@
 			        android:layout_alignParentLeft="true"
 			        android:layout_marginLeft="40dp"
 			        android:background="@drawable/icon_delete"/>
+			    <Button 
+			        android:id="@+id/note_btn_addpic"
+			        android:layout_width="48dp"
+			        android:layout_height="48dp"
+			        android:layout_alignParentTop="true"
+			        android:layout_centerHorizontal="true"
+			        android:background="@drawable/icon_addpic"
+			        />
 			     <Button
 			        android:id="@+id/note_btn_clock" 
 			        android:layout_width="48dp"
