@@ -492,9 +492,9 @@ public class NoteEditActivity extends Activity implements OnClickListener,
 			public void onClick(View arg0) {
 				// TODO Auto-generated method stub
 				new AlertDialog.Builder(NoteEditActivity.this)
-				.setTitle("选择图片")
+				.setTitle("閫夋嫨鍥剧墖")
 				.setIcon(android.R.drawable.ic_dialog_info)
-				.setSingleChoiceItems(new String[]{"相机","来自相册","涂鸦"}, 0, 
+				.setSingleChoiceItems(new String[]{"鐩告満","鐩稿唽","娑傞甫"}, 0, 
 						new DialogInterface.OnClickListener() {
 							
 							@Override
@@ -515,7 +515,7 @@ public class NoteEditActivity extends Activity implements OnClickListener,
 							}
 						}
 				)
-				.setNegativeButton("取消", null)
+				.setNegativeButton("鍙栨秷", null)
 				.show();
 			}
         	
