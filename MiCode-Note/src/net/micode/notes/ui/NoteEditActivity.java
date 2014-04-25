@@ -30,6 +30,8 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Paint;
+import android.media.MediaPlayer;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -48,6 +50,8 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
+import android.view.View.OnTouchListener;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -163,10 +167,19 @@ public class NoteEditActivity extends Activity implements OnClickListener,
     private Button btnDelete;
     private Button btnClock;
     private Button btnAddPic;
+    private Button btnRecord;
+    private MediaRecorder mRecorder;
+    private boolean isLongPress = false;
+    private Button btnPlay;
+    private MediaPlayer mPlayer;
+    private boolean isNewRecorder = false;
+    public static Bitmap drawPicbitmap ;
+    
     private ImageView imgPic;
     
 	private final int CAPTURE_CODE = 1001;
 	private final int ALBUM_CODE   = 1002;
+	private final int DRAW_CODE = 1003;
 	
 	private Bitmap bitmap;
 	
@@ -426,6 +439,52 @@ public class NoteEditActivity extends Activity implements OnClickListener,
 			}
 		});
         
+        btnRecord = (Button)findViewById(R.id.note_btn_record);
+        btnRecord.setOnLongClickListener(new OnLongClickListener(){
+
+			@Override
+			public boolean onLongClick(View arg0) {
+				// TODO Auto-generated method stub
+				isLongPress = true;
+				isNewRecorder = true;
+				startRecording();
+				return false;
+			}
+        	
+        });
+        
+        btnRecord.setOnTouchListener(new OnTouchListener(){
+
+			@Override
+			public boolean onTouch(View view, MotionEvent event) {
+				// TODO Auto-generated method stub
+				if(isLongPress){
+					switch(event.getAction()){
+					case MotionEvent.ACTION_UP:
+						isLongPress = false;
+						stopRecording();
+						break;
+						default:
+							break;
+					}
+				}
+				return false;
+			}
+        	
+        });
+        
+        btnPlay = (Button)findViewById(R.id.note_btn_play);
+        
+        btnPlay.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
+				startPlaying();
+			}
+        	
+        });
+        
         btnAddPic = (Button)findViewById(R.id.note_btn_addpic);
         btnAddPic.setOnClickListener(new OnClickListener(){
 
@@ -435,7 +494,7 @@ public class NoteEditActivity extends Activity implements OnClickListener,
 				new AlertDialog.Builder(NoteEditActivity.this)
 				.setTitle("选择图片")
 				.setIcon(android.R.drawable.ic_dialog_info)
-				.setSingleChoiceItems(new String[]{"相机","来自相册"}, 0, 
+				.setSingleChoiceItems(new String[]{"相机","来自相册","涂鸦"}, 0, 
 						new DialogInterface.OnClickListener() {
 							
 							@Override
@@ -447,6 +506,10 @@ public class NoteEditActivity extends Activity implements OnClickListener,
 									Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
 									intent.setType("image/");
 									startActivityForResult(intent, ALBUM_CODE);
+								} else if(which == 2){
+									Intent intent = new Intent();
+									intent.setClass(NoteEditActivity.this, DrawImageActivity.class);
+									startActivityForResult(intent, DRAW_CODE);
 								}
 								dialog.dismiss();
 							}
@@ -487,8 +550,79 @@ public class NoteEditActivity extends Activity implements OnClickListener,
         mEditTextList = (LinearLayout) findViewById(R.id.note_edit_list);
     }
 
+    private void stopRecording(){
+    	if(null != mRecorder){
+    		mRecorder.stop();
+    		mRecorder.release();
+    		mRecorder = null;
+    	}
+    }
     
+    private void startRecording(){
+    	mRecorder = new MediaRecorder();
+    	mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+    	mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+    	mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
+    	mRecorder.setOutputFile(Environment.getExternalStorageDirectory() + "/notewr/temp.3pg");
+    	
+    	try {
+			mRecorder.prepare();
+			mRecorder.start();
+		} catch (IllegalStateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    	
+    }
     
+    private void startPlaying(){
+    	if(null != mPlayer){
+    		mPlayer.release();
+    		mPlayer = null;
+    	}
+    	
+    	mPlayer = new MediaPlayer();
+    	
+    	String filepath = null;
+    	if(null != NoteID){
+    		if(isNewRecorder){
+    			filepath = Environment.getExternalStorageDirectory() + "/notewr/temp.3pg";
+    		}else{
+    			filepath = Environment.getExternalStorageDirectory() + "/notewr/" + NoteID + ".3pg";
+    		}
+    	}else if( null == NoteID){
+    		if(isNewRecorder){
+    			filepath = Environment.getExternalStorageDirectory() + "/notewr/temp.3pg";
+    		}else{
+    			filepath = null;
+    		}
+    	}
+    	if(null == filepath){
+    		return;
+    	}
+    	
+    	try {
+			mPlayer.setDataSource(filepath);
+			mPlayer.prepare();
+			mPlayer.start();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalStateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
     @Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		// TODO Auto-generated method stub
@@ -506,11 +640,38 @@ public class NoteEditActivity extends Activity implements OnClickListener,
 			} catch (Exception e) {
 				return;
 			}
+		} else if(requestCode == DRAW_CODE) {
+			bitmap = drawPicbitmap;
 		}
 //		new storeImageTask().execute();
 		imgPic.setImageBitmap(bitmap);
 	}
 
+    private class storeMediaTask extends AsyncTask<Void, Void, Void>{
+
+		@Override
+		protected Void doInBackground(Void... arg0) {
+			// TODO Auto-generated method stub
+			File f = new File(Environment.getExternalStorageDirectory() + "/notewr/temp.3pg");
+			if( !f.exists()){
+				return null;
+			}
+			File newf = new File(Environment.getExternalStorageDirectory() + "/notewr/" + NoteID + ".3pg");
+			if(!newf.exists()){
+				try {
+					newf.createNewFile();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+			f.renameTo(newf);
+			return null;
+		}
+    	
+    }
+    
     private class storeImageTask extends AsyncTask<Void, Void, Void>{
 
 		@Override
@@ -586,6 +747,14 @@ public class NoteEditActivity extends Activity implements OnClickListener,
         super.onPause();
         if(saveNote()) {
             Log.d(TAG, "Note data was saved with length:" + mWorkingNote.getContent().length());
+        }
+        if(null != mRecorder){
+        	mRecorder.release();
+        	mRecorder = null;
+        }
+        if(null != mPlayer){
+        	mPlayer.release();
+        	mPlayer = null;
         }
         clearSettingState();
     }
@@ -1006,6 +1175,7 @@ public class NoteEditActivity extends Activity implements OnClickListener,
         }
         Log.e(TAG, "we get the note id is " + NoteID);
         new storeImageTask().execute();
+        new storeMediaTask().execute();
         return saved;
     }
 

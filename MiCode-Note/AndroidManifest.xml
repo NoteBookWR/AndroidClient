@@ -31,6 +31,7 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>"
 
     <application
         android:icon="@drawable/icon_app"
@@ -138,6 +139,10 @@
             android:theme="@android:style/Theme.Holo.Light" >
         </activity>
 
+        <activity 
+            android:name="net.micode.notes.ui.DrawImageActivity"
+            ></activity>
+        
         <service
             android:name="net.micode.notes.gtask.remote.GTaskSyncService"
             android:exported="false" >

@@ -130,6 +130,14 @@
 			        android:layout_marginLeft="40dp"
 			        android:background="@drawable/icon_delete"/>
 			    <Button 
+			        android:id="@+id/note_btn_record"
+			        android:layout_width="48dp"
+			        android:layout_height="48dp"
+			        android:layout_alignLeft="@id/note_btn_delete"
+			        android:layout_marginLeft="48dp"
+			        android:background="@drawable/icon_record"
+			        />
+			    <Button 
 			        android:id="@+id/note_btn_addpic"
 			        android:layout_width="48dp"
 			        android:layout_height="48dp"
@@ -137,13 +145,23 @@
 			        android:layout_centerHorizontal="true"
 			        android:background="@drawable/icon_addpic"
 			        />
-			     <Button
+
+			    <Button
 			        android:id="@+id/note_btn_clock" 
 			        android:layout_width="48dp"
 			        android:layout_height="48dp"
 			        android:layout_alignParentRight="true"
 			        android:layout_marginRight="40dp"
 			        android:background="@drawable/icon_clock"/>
+			    
+			    <Button 
+			    	android:id="@+id/note_btn_play"
+			    	android:layout_width="48dp"
+			    	android:layout_height="48dp"
+			    	android:layout_alignRight="@id/note_btn_clock"
+			    	android:layout_marginRight="48dp"
+			    	android:background="@drawable/icon_play"
+			       	/>
 			</RelativeLayout>
             <ImageView
                 android:layout_width="fill_parent"
