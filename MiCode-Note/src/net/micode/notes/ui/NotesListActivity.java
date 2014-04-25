@@ -19,6 +19,7 @@ package net.micode.notes.ui;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.SearchManager;
 import android.appwidget.AppWidgetManager;
 import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
@@ -126,6 +127,8 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
     private NoteItemData mFocusNoteDataItem;
 
     private static final String NORMAL_SELECTION = NoteColumns.PARENT_ID + "=?";
+    
+    private static final String NORMAL_TEST = NoteColumns.SNIPPET + " LIKE ?";
 
     private static final String ROOT_FOLDER_SELECTION = "(" + NoteColumns.TYPE + "<>"
             + Notes.TYPE_SYSTEM + " AND " + NoteColumns.PARENT_ID + "=?)" + " OR ("
@@ -839,11 +842,33 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
 
     @Override
     public boolean onSearchRequested() {
-        startSearch(null, false, null /* appData */, false);
+    		startSearch(null, false, null, false);
         return true;
     }
+    
+    
 
-    private void exportNoteToText() {
+    @Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		String query = intent.getStringExtra(SearchManager.QUERY);
+		String selection = (mCurrentFolderId == Notes.ID_ROOT_FOLDER) ? ROOT_FOLDER_SELECTION
+                : NORMAL_SELECTION;
+		if(TextUtils.isEmpty(query)) {
+			mBackgroundQueryHandler.startQuery(FOLDER_NOTE_LIST_QUERY_TOKEN, null,
+	                Notes.CONTENT_NOTE_URI, NoteItemData.PROJECTION, selection, new String[] {
+						String.valueOf(mCurrentFolderId)
+	                }, NoteColumns.TYPE + " DESC," + NoteColumns.MODIFIED_DATE + " DESC");
+		} else {
+			selection = NORMAL_TEST;
+			mBackgroundQueryHandler.startQuery(FOLDER_NOTE_LIST_QUERY_TOKEN, null,
+	                Notes.CONTENT_NOTE_URI, NoteItemData.PROJECTION, selection, new String[] {
+	                    "%" + query + "%"
+	                }, NoteColumns.TYPE + " DESC," + NoteColumns.MODIFIED_DATE + " DESC");
+		}
+	}
+
+	private void exportNoteToText() {
         final BackupUtils backup = BackupUtils.getInstance(NotesListActivity.this);
         new AsyncTask<Void, Void, Integer>() {
 
