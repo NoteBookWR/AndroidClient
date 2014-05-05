@@ -92,7 +92,10 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
     private static final String PREFERENCE_ADD_INTRODUCTION = "net.micode.notes.introduction";
 
     private enum ListEditState {
-        NOTE_LIST, SUB_FOLDER, CALL_RECORD_FOLDER
+        NOTE_LIST, 
+        SUB_FOLDER, 
+        CALL_RECORD_FOLDER,
+        BACK_LIST
     };
 
     private ListEditState mState;
@@ -640,6 +643,10 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
                 mTitleBar.setVisibility(View.GONE);
                 startAsyncNotesListQuery();
                 break;
+            case BACK_LIST:
+            		startAsyncNotesListQuery();
+            		mState = ListEditState.NOTE_LIST;
+            		break;
             case NOTE_LIST:
                 super.onBackPressed();
                 break;
@@ -771,8 +778,7 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
     		startSearch(null, false, null, false);
         return true;
     }
-    
-    
+   
 
     @Override
 	protected void onNewIntent(Intent intent) {
@@ -791,6 +797,7 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
 	                Notes.CONTENT_NOTE_URI, NoteItemData.PROJECTION, selection, new String[] {
 	                    "%" + query + "%"
 	                }, NoteColumns.TYPE + " DESC," + NoteColumns.MODIFIED_DATE + " DESC");
+			mState = ListEditState.BACK_LIST;
 		}
 	}
 
