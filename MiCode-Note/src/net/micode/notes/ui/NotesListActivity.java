@@ -150,7 +150,7 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
         /**
          * Insert an introduction when user firstly use this application
          */
-        setAppInfoFromRawRes();
+        //setAppInfoFromRawRes();
     }
 
     @Override
