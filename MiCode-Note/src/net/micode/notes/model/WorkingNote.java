@@ -24,7 +24,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import net.micode.notes.data.Notes;
-import net.micode.notes.data.Notes.CallNote;
 import net.micode.notes.data.Notes.DataColumns;
 import net.micode.notes.data.Notes.DataConstants;
 import net.micode.notes.data.Notes.NoteColumns;
@@ -160,10 +159,6 @@ public class WorkingNote {
                         mContent = cursor.getString(DATA_CONTENT_COLUMN);
                         mMode = cursor.getInt(DATA_MODE_COLUMN);
                         mNote.setTextDataId(cursor.getLong(DATA_ID_COLUMN));
-                    } else if (DataConstants.CALL_NOTE.equals(type)) {
-                        mNote.setCallDataId(cursor.getLong(DATA_ID_COLUMN));
-                    } else {
-                        Log.d(TAG, "Wrong note type with type:" + type);
                     }
                 } while (cursor.moveToNext());
             }
@@ -286,12 +281,6 @@ public class WorkingNote {
             mContent = text;
             mNote.setTextData(DataColumns.CONTENT, mContent);
         }
-    }
-
-    public void convertToCallNote(String phoneNumber, long callDate) {
-        mNote.setCallData(CallNote.CALL_DATE, String.valueOf(callDate));
-        mNote.setCallData(CallNote.PHONE_NUMBER, phoneNumber);
-        mNote.setNoteValue(NoteColumns.PARENT_ID, String.valueOf(Notes.ID_CALL_RECORD_FOLDER));
     }
 
     public boolean hasClockAlert() {

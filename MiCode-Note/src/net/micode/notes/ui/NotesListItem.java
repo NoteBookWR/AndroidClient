@@ -34,7 +34,6 @@ public class NotesListItem extends LinearLayout {
     private ImageView mAlert;
     private TextView mTitle;
     private TextView mTime;
-    private TextView mCallName;
     private NoteItemData mItemData;
     private CheckBox mCheckBox;
 
@@ -44,7 +43,6 @@ public class NotesListItem extends LinearLayout {
         mAlert = (ImageView) findViewById(R.id.iv_alert_icon);
         mTitle = (TextView) findViewById(R.id.tv_title);
         mTime = (TextView) findViewById(R.id.tv_time);
-        mCallName = (TextView) findViewById(R.id.tv_name);
         mCheckBox = (CheckBox) findViewById(android.R.id.checkbox);
     }
 
@@ -58,8 +56,6 @@ public class NotesListItem extends LinearLayout {
 
         mItemData = data;
         if (data.getParentId() == Notes.ID_CALL_RECORD_FOLDER) {
-            mCallName.setVisibility(View.VISIBLE);
-            mCallName.setText(data.getCallName());
             mTitle.setTextAppearance(context,R.style.TextAppearanceSecondaryItem);
             mTitle.setText(DataUtils.getFormattedSnippet(data.getSnippet()));
             if (data.hasAlert()) {
@@ -69,7 +65,6 @@ public class NotesListItem extends LinearLayout {
                 mAlert.setVisibility(View.GONE);
             }
         } else {
-            mCallName.setVisibility(View.GONE);
             mTitle.setTextAppearance(context, R.style.TextAppearancePrimaryItem);
 
             if (data.getType() == Notes.TYPE_FOLDER) {

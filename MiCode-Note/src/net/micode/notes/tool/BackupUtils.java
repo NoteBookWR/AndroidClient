@@ -112,10 +112,6 @@ public class BackupUtils {
 
         private static final int DATA_COLUMN_MIME_TYPE = 1;
 
-        private static final int DATA_COLUMN_CALL_DATE = 2;
-
-        private static final int DATA_COLUMN_PHONE_NUMBER = 4;
-
         private final String [] TEXT_FORMAT;
         private static final int FORMAT_FOLDER_NAME          = 0;
         private static final int FORMAT_NOTE_DATE            = 1;
@@ -175,26 +171,7 @@ public class BackupUtils {
                 if (dataCursor.moveToFirst()) {
                     do {
                         String mimeType = dataCursor.getString(DATA_COLUMN_MIME_TYPE);
-                        if (DataConstants.CALL_NOTE.equals(mimeType)) {
-                            // Print phone number
-                            String phoneNumber = dataCursor.getString(DATA_COLUMN_PHONE_NUMBER);
-                            long callDate = dataCursor.getLong(DATA_COLUMN_CALL_DATE);
-                            String location = dataCursor.getString(DATA_COLUMN_CONTENT);
-
-                            if (!TextUtils.isEmpty(phoneNumber)) {
-                                ps.println(String.format(getFormat(FORMAT_NOTE_CONTENT),
-                                        phoneNumber));
-                            }
-                            // Print call date
-                            ps.println(String.format(getFormat(FORMAT_NOTE_CONTENT), DateFormat
-                                    .format(mContext.getString(R.string.format_datetime_mdhm),
-                                            callDate)));
-                            // Print call attachment location
-                            if (!TextUtils.isEmpty(location)) {
-                                ps.println(String.format(getFormat(FORMAT_NOTE_CONTENT),
-                                        location));
-                            }
-                        } else if (DataConstants.NOTE.equals(mimeType)) {
+                        if (DataConstants.NOTE.equals(mimeType)) {
                             String content = dataCursor.getString(DATA_COLUMN_CONTENT);
                             if (!TextUtils.isEmpty(content)) {
                                 ps.println(String.format(getFormat(FORMAT_NOTE_CONTENT),

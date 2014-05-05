@@ -26,7 +26,6 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import net.micode.notes.data.Notes;
-import net.micode.notes.data.Notes.CallNote;
 import net.micode.notes.data.Notes.DataColumns;
 import net.micode.notes.data.Notes.NoteColumns;
 import net.micode.notes.data.Notes.TextNote;
@@ -88,14 +87,6 @@ public class Note {
         return mNoteData.mTextDataId;
     }
 
-    public void setCallDataId(long id) {
-        mNoteData.setCallDataId(id);
-    }
-
-    public void setCallData(String key, String value) {
-        mNoteData.setCallData(key, value);
-    }
-
     public boolean isLocalModified() {
         return mNoteDiffValues.size() > 0 || mNoteData.isLocalModified();
     }
@@ -135,21 +126,15 @@ public class Note {
 
         private ContentValues mTextDataValues;
 
-        private long mCallDataId;
-
-        private ContentValues mCallDataValues;
-
         private static final String TAG = "NoteData";
 
         public NoteData() {
             mTextDataValues = new ContentValues();
-            mCallDataValues = new ContentValues();
             mTextDataId = 0;
-            mCallDataId = 0;
         }
 
         boolean isLocalModified() {
-            return mTextDataValues.size() > 0 || mCallDataValues.size() > 0;
+            return mTextDataValues.size() > 0 ;
         }
 
         void setTextDataId(long id) {
@@ -157,19 +142,6 @@ public class Note {
                 throw new IllegalArgumentException("Text data id should larger than 0");
             }
             mTextDataId = id;
-        }
-
-        void setCallDataId(long id) {
-            if (id <= 0) {
-                throw new IllegalArgumentException("Call data id should larger than 0");
-            }
-            mCallDataId = id;
-        }
-
-        void setCallData(String key, String value) {
-            mCallDataValues.put(key, value);
-            mNoteDiffValues.put(NoteColumns.LOCAL_MODIFIED, 1);
-            mNoteDiffValues.put(NoteColumns.MODIFIED_DATE, System.currentTimeMillis());
         }
 
         void setTextData(String key, String value) {
@@ -209,28 +181,6 @@ public class Note {
                     operationList.add(builder.build());
                 }
                 mTextDataValues.clear();
-            }
-
-            if(mCallDataValues.size() > 0) {
-                mCallDataValues.put(DataColumns.NOTE_ID, noteId);
-                if (mCallDataId == 0) {
-                    mCallDataValues.put(DataColumns.MIME_TYPE, CallNote.CONTENT_ITEM_TYPE);
-                    Uri uri = context.getContentResolver().insert(Notes.CONTENT_DATA_URI,
-                            mCallDataValues);
-                    try {
-                        setCallDataId(Long.valueOf(uri.getPathSegments().get(1)));
-                    } catch (NumberFormatException e) {
-                        Log.e(TAG, "Insert new call data fail with noteId" + noteId);
-                        mCallDataValues.clear();
-                        return null;
-                    }
-                } else {
-                    builder = ContentProviderOperation.newUpdate(ContentUris.withAppendedId(
-                            Notes.CONTENT_DATA_URI, mCallDataId));
-                    builder.withValues(mCallDataValues);
-                    operationList.add(builder.build());
-                }
-                mCallDataValues.clear();
             }
 
             if (operationList.size() > 0) {

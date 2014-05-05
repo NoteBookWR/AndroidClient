@@ -263,32 +263,8 @@ public class NoteEditActivity extends Activity implements OnClickListener,
             int bgResId = intent.getIntExtra(Notes.INTENT_EXTRA_BACKGROUND_ID,
                     ResourceParser.getDefaultBgId(this));
 
-            // Parse call-record note
-            String phoneNumber = intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER);
-            long callDate = intent.getLongExtra(Notes.INTENT_EXTRA_CALL_DATE, 0);
-            if (callDate != 0 && phoneNumber != null) {
-                if (TextUtils.isEmpty(phoneNumber)) {
-                    Log.e(TAG, "The call record number is null");
-                }
-                long noteId = 0;
-                if ((noteId = DataUtils.getNoteIdByPhoneNumberAndCallDate(getContentResolver(),
-                        phoneNumber, callDate)) > 0) {
-                	NoteID = noteId;
-                    mWorkingNote = WorkingNote.load(this, noteId);
-                    if (mWorkingNote == null) {
-                        Log.e(TAG, "load call note failed with note id" + noteId);
-                        finish();
-                        return false;
-                    }
-                } else {
-                    mWorkingNote = WorkingNote.createEmptyNote(this, folderId, widgetId,
-                            widgetType, bgResId);
-                    mWorkingNote.convertToCallNote(phoneNumber, callDate);
-                }
-            } else {
-                mWorkingNote = WorkingNote.createEmptyNote(this, folderId, widgetId, widgetType,
+            mWorkingNote = WorkingNote.createEmptyNote(this, folderId, widgetId, widgetType,
                         bgResId);
-            }
 
             getWindow().setSoftInputMode(
                     WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE

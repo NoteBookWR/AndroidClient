@@ -59,7 +59,6 @@ public class NotesDatabaseHelper extends SQLiteOpenHelper {
             NoteColumns.SYNC_ID + " INTEGER NOT NULL DEFAULT 0," +
             NoteColumns.LOCAL_MODIFIED + " INTEGER NOT NULL DEFAULT 0," +
             NoteColumns.ORIGIN_PARENT_ID + " INTEGER NOT NULL DEFAULT 0," +
-            NoteColumns.GTASK_ID + " TEXT NOT NULL DEFAULT ''," +
             NoteColumns.VERSION + " INTEGER NOT NULL DEFAULT 0" +
         ")";
 
@@ -345,9 +344,6 @@ public class NotesDatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TRIGGER IF EXISTS update_note_modified_date_on_insert");
         db.execSQL("DROP TRIGGER IF EXISTS update_note_modified_date_on_delete");
         db.execSQL("DROP TRIGGER IF EXISTS update_note_modified_date_on_update");
-        // add a column for gtask id
-        db.execSQL("ALTER TABLE " + TABLE.NOTE + " ADD COLUMN " + NoteColumns.GTASK_ID
-                + " TEXT NOT NULL DEFAULT ''");
         // add a trash system folder
         ContentValues values = new ContentValues();
         values.put(NoteColumns.ID, Notes.ID_TRASH_FOLER);

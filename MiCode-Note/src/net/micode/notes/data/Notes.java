@@ -48,7 +48,6 @@ public class Notes {
 
     public static class DataConstants {
         public static final String NOTE = TextNote.CONTENT_ITEM_TYPE;
-        public static final String CALL_NOTE = CallNote.CONTENT_ITEM_TYPE;
     }
 
     /**
@@ -155,12 +154,6 @@ public class Notes {
         public static final String ORIGIN_PARENT_ID = "origin_parent_id";
 
         /**
-         * The gtask id
-         * <P> Type : TEXT </P>
-         */
-        public static final String GTASK_ID = "gtask_id";
-
-        /**
          * The version code
          * <P> Type : INTEGER (long) </P>
          */
@@ -257,23 +250,4 @@ public class Notes {
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/text_note");
     }
 
-    public static final class CallNote implements DataColumns {
-        /**
-         * Call date for this record
-         * <P> Type: INTEGER (long) </P>
-         */
-        public static final String CALL_DATE = DATA1;
-
-        /**
-         * Phone number for this record
-         * <P> Type: TEXT </P>
-         */
-        public static final String PHONE_NUMBER = DATA3;
-
-        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/call_note";
-
-        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/call_note";
-
-        public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/call_note");
-    }
 }

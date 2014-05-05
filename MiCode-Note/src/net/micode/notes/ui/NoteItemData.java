@@ -67,8 +67,6 @@ public class NoteItemData {
     private int mType;
     private int mWidgetId;
     private int mWidgetType;
-    private String mName;
-    private String mPhoneNumber;
 
     private boolean mIsLastItem;
     private boolean mIsFirstItem;
@@ -91,21 +89,6 @@ public class NoteItemData {
         mType = cursor.getInt(TYPE_COLUMN);
         mWidgetId = cursor.getInt(WIDGET_ID_COLUMN);
         mWidgetType = cursor.getInt(WIDGET_TYPE_COLUMN);
-
-        mPhoneNumber = "";
-        if (mParentId == Notes.ID_CALL_RECORD_FOLDER) {
-            mPhoneNumber = DataUtils.getCallNumberByNoteId(context.getContentResolver(), mId);
-            if (!TextUtils.isEmpty(mPhoneNumber)) {
-                mName = Contact.getContact(context, mPhoneNumber);
-                if (mName == null) {
-                    mName = mPhoneNumber;
-                }
-            }
-        }
-
-        if (mName == null) {
-            mName = "";
-        }
         checkPostion(cursor);
     }
 
@@ -144,10 +127,6 @@ public class NoteItemData {
 
     public boolean isLast() {
         return mIsLastItem;
-    }
-
-    public String getCallName() {
-        return mName;
     }
 
     public boolean isFirst() {
@@ -212,10 +191,6 @@ public class NoteItemData {
 
     public boolean hasAlert() {
         return (mAlertDate > 0);
-    }
-
-    public boolean isCallRecord() {
-        return (mParentId == Notes.ID_CALL_RECORD_FOLDER && !TextUtils.isEmpty(mPhoneNumber));
     }
 
     public static int getNoteType(Cursor cursor) {

@@ -27,7 +27,6 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import net.micode.notes.data.Notes;
-import net.micode.notes.data.Notes.CallNote;
 import net.micode.notes.data.Notes.NoteColumns;
 import net.micode.notes.ui.NotesListAdapter.AppWidgetAttribute;
 
@@ -222,46 +221,6 @@ public class DataUtils {
             c.close();
         }
         return set;
-    }
-
-    public static String getCallNumberByNoteId(ContentResolver resolver, long noteId) {
-        Cursor cursor = resolver.query(Notes.CONTENT_DATA_URI,
-                new String [] { CallNote.PHONE_NUMBER },
-                CallNote.NOTE_ID + "=? AND " + CallNote.MIME_TYPE + "=?",
-                new String [] { String.valueOf(noteId), CallNote.CONTENT_ITEM_TYPE },
-                null);
-
-        if (cursor != null && cursor.moveToFirst()) {
-            try {
-                return cursor.getString(0);
-            } catch (IndexOutOfBoundsException e) {
-                Log.e(TAG, "Get call number fails " + e.toString());
-            } finally {
-                cursor.close();
-            }
-        }
-        return "";
-    }
-
-    public static long getNoteIdByPhoneNumberAndCallDate(ContentResolver resolver, String phoneNumber, long callDate) {
-        Cursor cursor = resolver.query(Notes.CONTENT_DATA_URI,
-                new String [] { CallNote.NOTE_ID },
-                CallNote.CALL_DATE + "=? AND " + CallNote.MIME_TYPE + "=? AND PHONE_NUMBERS_EQUAL("
-                + CallNote.PHONE_NUMBER + ",?)",
-                new String [] { String.valueOf(callDate), CallNote.CONTENT_ITEM_TYPE, phoneNumber },
-                null);
-
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                try {
-                    return cursor.getLong(0);
-                } catch (IndexOutOfBoundsException e) {
-                    Log.e(TAG, "Get call note id fails " + e.toString());
-                }
-            }
-            cursor.close();
-        }
-        return 0;
     }
 
     public static String getSnippetById(ContentResolver resolver, long noteId) {
