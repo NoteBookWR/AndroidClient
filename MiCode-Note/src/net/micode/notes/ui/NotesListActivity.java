@@ -162,52 +162,6 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
         }
     }
 
-    private void setAppInfoFromRawRes() {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        if (!sp.getBoolean(PREFERENCE_ADD_INTRODUCTION, false)) {
-            StringBuilder sb = new StringBuilder();
-            InputStream in = null;
-            try {
-                 in = getResources().openRawResource(R.raw.introduction);
-                if (in != null) {
-                    InputStreamReader isr = new InputStreamReader(in);
-                    BufferedReader br = new BufferedReader(isr);
-                    char [] buf = new char[1024];
-                    int len = 0;
-                    while ((len = br.read(buf)) > 0) {
-                        sb.append(buf, 0, len);
-                    }
-                } else {
-                    Log.e(TAG, "Read introduction file error");
-                    return;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                return;
-            } finally {
-                if(in != null) {
-                    try {
-                        in.close();
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            WorkingNote note = WorkingNote.createEmptyNote(this, Notes.ID_ROOT_FOLDER,
-                    AppWidgetManager.INVALID_APPWIDGET_ID, Notes.TYPE_WIDGET_INVALIDE,
-                    ResourceParser.RED);
-            note.setWorkingText(sb.toString());
-            if (note.saveNote()) {
-                sp.edit().putBoolean(PREFERENCE_ADD_INTRODUCTION, true).commit();
-            } else {
-                Log.e(TAG, "Save introduction note error");
-                return;
-            }
-        }
-    }
-
     @Override
     protected void onStart() {
         super.onStart();
