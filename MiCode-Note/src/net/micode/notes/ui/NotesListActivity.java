@@ -64,7 +64,6 @@ import android.widget.Toast;
 import net.micode.notes.R;
 import net.micode.notes.data.Notes;
 import net.micode.notes.data.Notes.NoteColumns;
-import net.micode.notes.gtask.remote.GTaskSyncService;
 import net.micode.notes.model.WorkingNote;
 import net.micode.notes.tool.BackupUtils;
 import net.micode.notes.tool.DataUtils;
@@ -388,7 +387,7 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
                     /**
                      * HACKME:When click the transparent part of "New Note" button, dispatch
                      * the event to the list view behind this button. The transparent part of
-                     * "New Note" button could be expressed by formula y=-0.12x+94（Unit:pixel）
+                     * "New Note" button could be expressed by formula y=-0.12x+94锛圲nit:pixel锛�
                      * and the line top of the button. The coordinate based on left of the "New
                      * Note" button. The 94 represents maximum height of the transparent part.
                      * Notice that, if the background of the button changes, the formula should
@@ -495,20 +494,11 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
         new AsyncTask<Void, Void, HashSet<AppWidgetAttribute>>() {
             protected HashSet<AppWidgetAttribute> doInBackground(Void... unused) {
                 HashSet<AppWidgetAttribute> widgets = mNotesListAdapter.getSelectedWidget();
-                if (!isSyncMode()) {
-                    // if not synced, delete notes directly
-                    if (DataUtils.batchDeleteNotes(mContentResolver, mNotesListAdapter
-                            .getSelectedItemIds())) {
-                    } else {
-                        Log.e(TAG, "Delete notes error, should not happens");
-                    }
-                } else {
                     // in sync mode, we'll move the deleted note into the trash
                     // folder
                     if (!DataUtils.batchMoveToFolder(mContentResolver, mNotesListAdapter
                             .getSelectedItemIds(), Notes.ID_TRASH_FOLER)) {
                         Log.e(TAG, "Move notes to trash folder error, should not happens");
-                    }
                 }
                 return widgets;
             }
@@ -538,13 +528,7 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
         ids.add(folderId);
         HashSet<AppWidgetAttribute> widgets = DataUtils.getFolderNoteWidget(mContentResolver,
                 folderId);
-        if (!isSyncMode()) {
-            // if not synced, delete folder directly
-            DataUtils.batchDeleteNotes(mContentResolver, ids);
-        } else {
-            // in sync mode, we'll move the deleted folder into the trash folder
-            DataUtils.batchMoveToFolder(mContentResolver, ids, Notes.ID_TRASH_FOLER);
-        }
+        DataUtils.batchMoveToFolder(mContentResolver, ids, Notes.ID_TRASH_FOLER);
         if (widgets != null) {
             for (AppWidgetAttribute widget : widgets) {
                 if (widget.widgetId != AppWidgetManager.INVALID_APPWIDGET_ID
@@ -811,18 +795,6 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
                 exportNoteToText();
                 break;
             }
-            case R.id.menu_sync: {
-                if (isSyncMode()) {
-                    if (TextUtils.equals(item.getTitle(), getString(R.string.menu_sync))) {
-                        GTaskSyncService.startSync(this);
-                    } else {
-                        GTaskSyncService.cancelSync(this);
-                    }
-                } else {
-                    startPreferenceActivity();
-                }
-                break;
-            }
             case R.id.menu_setting: {
                 startPreferenceActivity();
                 break;
@@ -908,10 +880,6 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
             }
 
         }.execute();
-    }
-
-    private boolean isSyncMode() {
-        return NotesPreferenceActivity.getSyncAccountName(this).trim().length() > 0;
     }
 
     private void startPreferenceActivity() {

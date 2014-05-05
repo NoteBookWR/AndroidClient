@@ -563,6 +563,10 @@ public class NoteEditActivity extends Activity implements OnClickListener,
     	mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
     	mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
     	mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
+		File together = new File(Environment.getExternalStorageDirectory() + "/notewr");
+		if(!together.exists()){
+			together.mkdirs();
+		}
     	mRecorder.setOutputFile(Environment.getExternalStorageDirectory() + "/notewr/temp.3pg");
     	
     	try {
@@ -949,22 +953,13 @@ public class NoteEditActivity extends Activity implements OnClickListener,
             } else {
                 Log.d(TAG, "Wrong note id, should not happen");
             }
-            if (!isSyncMode()) {
-                if (!DataUtils.batchDeleteNotes(getContentResolver(), ids)) {
-                    Log.e(TAG, "Delete Note error");
-                }
-            } else {
-                if (!DataUtils.batchMoveToFolder(getContentResolver(), ids, Notes.ID_TRASH_FOLER)) {
+            if (!DataUtils.batchMoveToFolder(getContentResolver(), ids, Notes.ID_TRASH_FOLER)) {
                     Log.e(TAG, "Move notes to trash folder error, should not happens");
-                }
             }
         }
         mWorkingNote.markDeleted(true);
     }
 
-    private boolean isSyncMode() {
-        return NotesPreferenceActivity.getSyncAccountName(this).trim().length() > 0;
-    }
 
     public void onClockAlertChanged(long date, boolean set) {
         /**
