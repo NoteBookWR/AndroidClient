@@ -2,9 +2,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name">便签</string>
-    <string name="app_widget2x2">便签2x2</string>
-    <string name="app_widget4x4">便签4x4</string>
+    <string name="app_name">记事本</string>
+    <string name="app_widget2x2">记事本2x2</string>
+    <string name="app_widget4x4">记事本4x4</string>
     <string name="widget_havenot_content">没有关联内容，点击新建便签。</string>
     <string name="widget_under_visit_mode">访客模式下，便签内容不可见</string>
     <string name="notelist_string_info">...</string>
