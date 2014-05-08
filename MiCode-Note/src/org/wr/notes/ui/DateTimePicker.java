@@ -88,7 +88,8 @@ public class DateTimePicker extends FrameLayout {
                     isDateChanged = true;
                 }
             }
-            int newHour = mHourSpinner.getValue() % HOURS_IN_HALF_DAY + (mIsAm ? 0 : HOURS_IN_HALF_DAY);
+            //int newHour = mHourSpinner.getValue() % HOURS_IN_HALF_DAY + (mIsAm ? 0 : HOURS_IN_HALF_DAY);
+            int newHour = newVal;
             mDate.set(Calendar.HOUR_OF_DAY, newHour);
             onDateTimeChanged();
             if (isDateChanged) {
