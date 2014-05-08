@@ -45,6 +45,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -442,13 +443,9 @@ public class NoteEditActivity extends Activity implements OnClickListener,
         btnPlay = (Button)findViewById(R.id.note_btn_play);
         
         //find if the play button is visible
-        String filepath = Environment.getExternalStorageDirectory() + "/notewr/" + NoteID + mWorkingNote.getModifiedDate() + ".3pg";
-        File mediafile = new File(filepath);
-        if(!mediafile.exists()){
-        	btnPlay.setActivated(false);
-        	btnPlay.setVisibility(View.INVISIBLE);
-        }
-        
+        //btnRecord.layout(btnRecord.getLeft() + 24, btnRecord.getTop(), btnRecord.getRight() + 24, btnRecord.getBottom());
+        //btnAddPic.layout(btnAddPic.getLeft() + 48, btnAddPic.getTop(), btnAddPic.getRight() + 48, btnAddPic.getBottom());
+
         btnPlay.setOnClickListener(new OnClickListener(){
 
 			@Override
@@ -495,6 +492,22 @@ public class NoteEditActivity extends Activity implements OnClickListener,
         	
         });
         
+        
+        String filepath = Environment.getExternalStorageDirectory() + "/notewr/" + NoteID + mWorkingNote.getModifiedDate() + ".3pg";
+        File mediafile = new File(filepath);
+        if(!mediafile.exists()){
+        	btnPlay.setActivated(false);
+        	btnPlay.setVisibility(View.INVISIBLE);
+        }
+        
+        LayoutParams btnRecordLayout = (LayoutParams) btnRecord.getLayoutParams();
+        btnRecordLayout.leftMargin += 24 * 2;
+        btnRecord.setLayoutParams(btnRecordLayout);
+        
+        LayoutParams btnAddPicLayout = (LayoutParams) btnAddPic.getLayoutParams();
+        btnAddPicLayout.leftMargin += 24 * 2;
+        btnAddPic.setLayoutParams(btnAddPicLayout);
+        
         imgPic = (ImageView)findViewById(R.id.note_image_pic);
         new getImageTask().execute();
         
@@ -535,6 +548,13 @@ public class NoteEditActivity extends Activity implements OnClickListener,
     	}
     	btnPlay.setActivated(true);
     	btnPlay.setVisibility(View.VISIBLE);
+        LayoutParams btnRecordLayout = (LayoutParams) btnRecord.getLayoutParams();
+        btnRecordLayout.leftMargin -= 24 * 2;
+        btnRecord.setLayoutParams(btnRecordLayout);
+        
+        LayoutParams btnAddPicLayout = (LayoutParams) btnAddPic.getLayoutParams();
+        btnAddPicLayout.leftMargin -= 24 * 2;
+        btnAddPic.setLayoutParams(btnAddPicLayout);
     }
     
     private void startRecording(){

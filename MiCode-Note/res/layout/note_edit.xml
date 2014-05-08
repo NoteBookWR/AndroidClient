@@ -127,7 +127,8 @@
 			        android:layout_width="48dp"
 			        android:layout_height="48dp"
 			        android:layout_alignParentTop="true"
-			        android:layout_centerHorizontal="true"
+			        android:layout_alignLeft="@id/note_btn_record"
+			        android:layout_marginLeft="50dp"
 			        android:background="@drawable/icon_addpic"
 			        />
 
