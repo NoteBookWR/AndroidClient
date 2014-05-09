@@ -102,7 +102,7 @@ public class DrawImageActivity extends Activity{
 			displayHeight = dm.heightPixels;
 			
 			Resources r = this.getResources();
-			mBitmap1 = BitmapFactory.decodeResource(r, R.drawable.widget_4x_blue);	
+			mBitmap1 = BitmapFactory.decodeResource(r, R.drawable);	
 			mBitmap = Bitmap.createBitmap(mBitmap1.getWidth(), mBitmap1.getHeight(), Config.ARGB_8888);
 			mCanvas = new Canvas(mBitmap);
 			mPath = new Path();
