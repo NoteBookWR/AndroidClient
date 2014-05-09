@@ -102,14 +102,8 @@ public class DrawImageActivity extends Activity{
 			displayHeight = dm.heightPixels;
 			
 			Resources r = this.getResources();
-			mBitmap1 = BitmapFactory.decodeResource(r, R.drawable.widget_4x_blue);
-			
-			Matrix matrix = new Matrix();
-			matrix.postScale(displayWidth/mBitmap1.getWidth() * 2, displayWidth /mBitmap1.getWidth() * 2);
-			Bitmap mBitmap2 = Bitmap.createBitmap(mBitmap1, 0, 0, mBitmap1.getWidth(), mBitmap1.getHeight(), matrix, true);
-			
-			
-			mBitmap = Bitmap.createBitmap(mBitmap2.getWidth(), mBitmap2.getHeight(), Config.ARGB_8888);
+			mBitmap1 = BitmapFactory.decodeResource(r, R.drawable.widget_4x_blue);	
+			mBitmap = Bitmap.createBitmap(mBitmap1.getWidth(), mBitmap1.getHeight(), Config.ARGB_8888);
 			mCanvas = new Canvas(mBitmap);
 			mPath = new Path();
 			mBitmapPaint = new Paint(Paint.DITHER_FLAG);

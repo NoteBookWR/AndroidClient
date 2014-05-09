@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -174,6 +175,8 @@ public class NoteEditActivity extends Activity implements OnClickListener,
 	private String NoteStoreTime;
 	
 	private String modifiedTime = "";
+	private boolean isBtnMoved = false;
+	private boolean isNewNote = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -256,6 +259,7 @@ public class NoteEditActivity extends Activity implements OnClickListener,
 
             mWorkingNote = WorkingNote.createEmptyNote(this, folderId, widgetId, widgetType,
                         bgResId);
+            isNewNote = true;
             Log.e(TAG, "i want find the pre note time is old" + mWorkingNote.getModifiedDate());
             getWindow().setSoftInputMode(
                     WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
@@ -493,20 +497,23 @@ public class NoteEditActivity extends Activity implements OnClickListener,
         });
         
         
-        String filepath = Environment.getExternalStorageDirectory() + "/notewr/" + NoteID + mWorkingNote.getModifiedDate() + ".3pg";
+        String filepath = Environment.getExternalStorageDirectory() + "/notewr/" + NoteID + ".3pg";
         File mediafile = new File(filepath);
         if(!mediafile.exists()){
         	btnPlay.setActivated(false);
         	btnPlay.setVisibility(View.INVISIBLE);
+        	
+            LayoutParams btnRecordLayout = (LayoutParams) btnRecord.getLayoutParams();
+            btnRecordLayout.leftMargin += 24 * 2;
+            btnRecord.setLayoutParams(btnRecordLayout);
+            
+            LayoutParams btnAddPicLayout = (LayoutParams) btnAddPic.getLayoutParams();
+            btnAddPicLayout.leftMargin += 24 * 2;
+            btnAddPic.setLayoutParams(btnAddPicLayout);
+            
+            isBtnMoved = true;
         }
         
-        LayoutParams btnRecordLayout = (LayoutParams) btnRecord.getLayoutParams();
-        btnRecordLayout.leftMargin += 24 * 2;
-        btnRecord.setLayoutParams(btnRecordLayout);
-        
-        LayoutParams btnAddPicLayout = (LayoutParams) btnAddPic.getLayoutParams();
-        btnAddPicLayout.leftMargin += 24 * 2;
-        btnAddPic.setLayoutParams(btnAddPicLayout);
         
         imgPic = (ImageView)findViewById(R.id.note_image_pic);
         new getImageTask().execute();
@@ -548,13 +555,18 @@ public class NoteEditActivity extends Activity implements OnClickListener,
     	}
     	btnPlay.setActivated(true);
     	btnPlay.setVisibility(View.VISIBLE);
-        LayoutParams btnRecordLayout = (LayoutParams) btnRecord.getLayoutParams();
-        btnRecordLayout.leftMargin -= 24 * 2;
-        btnRecord.setLayoutParams(btnRecordLayout);
-        
-        LayoutParams btnAddPicLayout = (LayoutParams) btnAddPic.getLayoutParams();
-        btnAddPicLayout.leftMargin -= 24 * 2;
-        btnAddPic.setLayoutParams(btnAddPicLayout);
+    	
+		if (isBtnMoved) {
+			LayoutParams btnRecordLayout = (LayoutParams) btnRecord.getLayoutParams();
+			btnRecordLayout.leftMargin -= 24 * 2;
+			btnRecord.setLayoutParams(btnRecordLayout);
+
+			LayoutParams btnAddPicLayout = (LayoutParams) btnAddPic.getLayoutParams();
+			btnAddPicLayout.leftMargin -= 24 * 2;
+			btnAddPic.setLayoutParams(btnAddPicLayout);
+			
+			isBtnMoved = false;
+		}
     }
     
     private void startRecording(){
@@ -599,7 +611,7 @@ public class NoteEditActivity extends Activity implements OnClickListener,
     		if(isNewRecorder){
     			filepath = Environment.getExternalStorageDirectory() + "/notewr/temp.3pg";
     		}else{
-    			filepath = Environment.getExternalStorageDirectory() + "/notewr/" + NoteID + mWorkingNote.getModifiedDate() + ".3pg";
+    			filepath = Environment.getExternalStorageDirectory() + "/notewr/" + NoteID + ".3pg";
     		}
     	}else if( null == NoteID){
     		if(isNewRecorder){
@@ -640,6 +652,10 @@ public class NoteEditActivity extends Activity implements OnClickListener,
 		}
 		if(requestCode == CAPTURE_CODE) {
 			bitmap = (Bitmap)data.getExtras().get("data");
+			Matrix matrix = new Matrix();
+			matrix.postScale(2.0f, 2.0f);
+			Bitmap resizeBmp = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(),matrix, true);
+			bitmap = resizeBmp;
 		} else if(requestCode == ALBUM_CODE) {
 			Uri originalUri = data.getData();
 			try {
@@ -649,8 +665,12 @@ public class NoteEditActivity extends Activity implements OnClickListener,
 			}
 		} else if(requestCode == DRAW_CODE) {
 			bitmap = drawPicbitmap;
+			Matrix matrix = new Matrix();
+			matrix.postScale(1.4f, 1.4f);
+			Bitmap resizeBmp = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(),matrix, true);
+			bitmap = resizeBmp;
 		}
-//		new storeImageTask().execute();
+
 		imgPic.setImageBitmap(bitmap);
 	}
 
@@ -663,7 +683,7 @@ public class NoteEditActivity extends Activity implements OnClickListener,
 			if( !f.exists()){
 				return null;
 			}
-			File newf = new File(Environment.getExternalStorageDirectory() + "/notewr/" + NoteID + times[0] + ".3pg");
+			File newf = new File(Environment.getExternalStorageDirectory() + "/notewr/" + NoteID + ".3pg");
 			if(!newf.exists()){
 				try {
 					newf.createNewFile();
@@ -694,7 +714,7 @@ public class NoteEditActivity extends Activity implements OnClickListener,
 					if(!together.exists()){
 						together.mkdirs();
 					}
-					FileOutputStream fop = new FileOutputStream(Environment.getExternalStorageDirectory() + "/notewr/" + NoteID + times[0] +".jpg");
+					FileOutputStream fop = new FileOutputStream(Environment.getExternalStorageDirectory() + "/notewr/" + NoteID +".jpg");
 					bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fop);
 					fop.close();
 					Log.e(TAG, "we have store the bitmap");
@@ -723,7 +743,7 @@ public class NoteEditActivity extends Activity implements OnClickListener,
 			}
 			
 			try {
-				FileInputStream fis = new FileInputStream(Environment.getExternalStorageDirectory() + "/notewr/" + NoteID + mWorkingNote.getModifiedDate() +".jpg");
+				FileInputStream fis = new FileInputStream(Environment.getExternalStorageDirectory() + "/notewr/" + NoteID +".jpg");
 				Bitmap myLittleBitmap = BitmapFactory.decodeStream(fis);
 				if(null == myLittleBitmap){
 					Log.e(TAG, "we have not get the bitmap");
@@ -753,6 +773,12 @@ public class NoteEditActivity extends Activity implements OnClickListener,
 	@Override
     protected void onPause() {
         super.onPause();
+        
+        if (!mWorkingNote.existInDatabase()) {
+            saveNote();
+            Log.e(TAG, "onpause");
+        }
+
         if(null != mRecorder){
         	mRecorder.release();
         	mRecorder = null;
@@ -869,7 +895,7 @@ public class NoteEditActivity extends Activity implements OnClickListener,
     		showToast(R.string.error_note_not_exist);
         switch (item.getItemId()) {
             case R.id.menu_new_note:
-                createNewNote();
+ //               createNewNote();
                 break;
             case R.id.menu_delete:
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -961,12 +987,12 @@ public class NoteEditActivity extends Activity implements OnClickListener,
         }
         mWorkingNote.markDeleted(true);
         
-        File picFile = new File(Environment.getExternalStorageDirectory() + "/notewr/" + NoteID + mWorkingNote.getModifiedDate() +".jpg");
+        File picFile = new File(Environment.getExternalStorageDirectory() + "/notewr/" + NoteID  +".jpg");
         if(picFile.exists()){
         	picFile.delete();
         }
         
-        File mediaFile = new File(Environment.getExternalStorageDirectory() + "/notewr/" + NoteID + mWorkingNote.getModifiedDate() + ".3pg");
+        File mediaFile = new File(Environment.getExternalStorageDirectory() + "/notewr/" + NoteID + ".3pg");
         if(mediaFile.exists()){
         	mediaFile.delete();
         }
@@ -980,6 +1006,7 @@ public class NoteEditActivity extends Activity implements OnClickListener,
          */
         if (!mWorkingNote.existInDatabase()) {
             saveNote();
+            Log.e(TAG, "hahaha");
         }
         if (mWorkingNote.getNoteId() > 0) {
             Intent intent = new Intent(this, AlarmReceiver.class);
@@ -1159,9 +1186,12 @@ public class NoteEditActivity extends Activity implements OnClickListener,
                     }
                 }
             }
-            mWorkingNote.setWorkingText(sb.toString());
+            	mWorkingNote.setWorkingText(sb.toString());
+
         } else {
-            mWorkingNote.setWorkingText(mNoteEditor.getText().toString());
+
+        		mWorkingNote.setWorkingText(mNoteEditor.getText().toString());
+        	
         }
         return hasChecked;
     }
@@ -1170,6 +1200,7 @@ public class NoteEditActivity extends Activity implements OnClickListener,
         getWorkingText();
         long time = System.currentTimeMillis();
         modifiedTime = mWorkingNote.getModifiedDate() + "";
+        Log.e(TAG, "i want find the modified time is back notsave" + modifiedTime);
         boolean saved = mWorkingNote.saveNote(time);
         if (saved) {
             /**
@@ -1184,7 +1215,7 @@ public class NoteEditActivity extends Activity implements OnClickListener,
             setResult(RESULT_OK);
         }
         Log.e(TAG, "we get the note id is " + NoteID);        
-        Log.e(TAG, "i want find the modified time is back save" + modifiedTime);
+        Log.e(TAG, "i want find the modified time is back save" + time);
         new storeImageTask().execute(modifiedTime);
         new storeMediaTask().execute(modifiedTime);
         return saved;
